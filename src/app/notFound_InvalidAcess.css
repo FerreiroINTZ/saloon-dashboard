@@ -1,0 +1,26 @@
+#loguiError-section, #not_found-section{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding-top: 100px;
+    text-align: center;
+    height: 100%;
+    text-align: center;
+    color: var(--text-color);
+    
+    h1{
+        font-size: 80px;
+        color: var(--red-color);
+    }
+
+    p{
+        font-size: 30px;
+    }
+
+    #loguinErro-image, #not_found-image{
+        margin-top: 30px;
+        /* background: red; */
+        width: 200px;
+        height: 200px;
+    }
+}
