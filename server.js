@@ -1,7 +1,17 @@
 const server = require("fastify")()
 const {Pool} = require("pg")
+const cookies = require("@fastify/cookie")
+const cors = require("@fastify/cors")
 
 console.log("Servidor no Ar!")
+
+    server.register(cookies)
+
+    server.register(cors, {
+        origin: "http://localhost:3000",
+        methods: ["GET", "POST"],
+        credentials: true
+    })
 
     const db = new Pool({
         user: "postgres",
@@ -19,6 +29,12 @@ console.log("Servidor no Ar!")
     data()
 
 server.get("/get/:user", async (request, reply) =>{
+
+    const {cookies} = request
+
+    console.log("cookies: ")
+    console.log(cookies)
+
     let {user} = request.params
     user = user.toLowerCase()
     const {token} = request.query
@@ -33,13 +49,27 @@ server.get("/get/:user", async (request, reply) =>{
     console.log("ROWS:")
     console.log(rows)
 
-    // como zero e false, entao se a array nao retornar nada ele nao exibe
+    // todas as autenticacoes sao feitas aqui
     if(rows.length){
-        reply.send({acesso: true})
+        reply.send({acess: true})
     }else{
-        reply.send({acesso: false})
+        reply.send({acess: false})
     }
 
+})
+
+server.get("/authCookie", (request, reply) =>{
+    reply.send({text: "nada"})
+})
+
+server.get("/getResumo", (request, reply) =>{
+    console.log("\nResumo\n")
+
+    const {nome} = request.cookies
+    console.log(nome)
+    console.log(request.cookies)
+    console.log(server)
+    reply.send({text: nome})
 })
 
 server.listen({port: 3001})
