@@ -51,25 +51,37 @@ server.get("/get/:user", async (request, reply) =>{
 
     // todas as autenticacoes sao feitas aqui
     if(rows.length){
+        console.log("Acesso:")
+        console.error("Aceito")
         reply.send({acess: true})
     }else{
+        console.log("Acesso:")
+        console.error("negado")
         reply.send({acess: false})
     }
 
 })
 
-server.get("/authCookie", (request, reply) =>{
-    reply.send({text: "nada"})
-})
-
-server.get("/getResumo", (request, reply) =>{
+server.get("/getResumo", async (request, reply) =>{
     console.log("\nResumo\n")
 
-    const {nome} = request.cookies
+    const {nome} = request.query
+    const {token} = request.query
     console.log(nome)
-    console.log(request.cookies)
-    console.log(server)
-    reply.send({text: nome})
+    console.log(token)
+
+    // pesquisa os clientes com agendamento para hoje
+    // Dados da pesquisa:
+    // Nome do cliente
+    // Horario
+    // Servico
+    // Telefone
+
+    // Fora que ele filtra para os agendamentos de Hoje
+    const query = "SELECT clientes.telefone, clientes.nome, horario, servico_valor.servico FROM agendamentos JOIN clientes ON clientes.telefone = client_id JOIN servico_valor ON servico_valor. id = servico_valor WHERE data_agendamento <= CURRENT_DATE"
+
+    const {rows} = await db.query(query)
+    reply.send(rows)
 })
 
 server.listen({port: 3001})
