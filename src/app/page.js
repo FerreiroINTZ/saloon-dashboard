@@ -1,4 +1,5 @@
 import{redirect} from "next/navigation"
+import Aside from "./aside/aside"
 
 export default async function Home({children}) {
 

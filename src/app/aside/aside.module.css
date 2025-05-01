@@ -1,6 +1,7 @@
 #dashboard-section{
     display: flex;
     height: 100%;
+    width: 100px;
 
     #aside_background_opacity{
         position: absolute;
@@ -21,7 +22,7 @@
         gap: 30px;
         flex-shrink: auto;
         z-index: 2;
-        width: 100px;
+        min-width: 100px;
         height: 100%;
         background: linear-gradient(60deg, #162D65, #5577C9);
         border-right: 4px solid white;
@@ -29,7 +30,7 @@
         transition: .3s ease-in-out;
         
         &:hover{
-            width: 400px;
+            min-width: 400px;
             
             & ~ #aside_background_opacity{
                 opacity: .5;
@@ -46,6 +47,7 @@
             color: white;
             opacity: 0;
             font-size: 30px;
+            text-decoration: none;
             width: fit-content;
             white-space: nowrap;
             cursor: pointer;
@@ -67,9 +69,5 @@
                 background: white;
             }
         }
-    }
-    main{
-        flex-grow: 1;
-        background: red;
     }
 }
