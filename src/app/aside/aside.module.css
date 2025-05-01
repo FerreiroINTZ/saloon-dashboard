@@ -4,6 +4,7 @@
     width: 100px;
 
     #aside_background_opacity{
+        display: none;
         position: absolute;
         top:0;
         left: 0;
@@ -33,6 +34,7 @@
             min-width: 400px;
             
             & ~ #aside_background_opacity{
+                display: block;
                 opacity: .5;
             }
             

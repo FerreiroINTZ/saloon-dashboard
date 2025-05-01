@@ -13,6 +13,7 @@ export async function GET(request){
     console.log(token)
 
     // pesquisa no servidor se tem os dados
+    const nada = await fetch(`http://localhost:3001/authCookie`)
     const getAcess = await fetch(`http://localhost:3001/get/${nome}?token=${token}`)
     const {acess} = await getAcess.json()
 
@@ -22,8 +23,8 @@ export async function GET(request){
     let response;
     if(acess){
         response = NextResponse.redirect("http://localhost:3000/resumo")
-        response.cookies.set("nome", nome, {httpOnly: true})
-        response.cookies.set("token", token, {httpOnly: true})
+        response.cookies.set("nome", nome, {httpOnly: true, secure: false, sameSite: "lax"})
+        response.cookies.set("token", token, {httpOnly: true, secure: false, sameSite: "lax"})
     }else{
         response = NextResponse.redirect("http://localhost:3000/acessoNegado")
     }
