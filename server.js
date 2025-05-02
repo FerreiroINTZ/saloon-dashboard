@@ -70,6 +70,8 @@ server.get("/getResumo", async (request, reply) =>{
     console.log(nome)
     console.log(token)
 
+    // Fora que ele filtra para os agendamentos de Hoje
+    const query = "SELECT clientes.telefone, clientes.nome, horario, servico_valor.servico FROM agendamentos JOIN clientes ON clientes.telefone = client_id JOIN servico_valor ON servico_valor. id = servico_valor WHERE data_agendamento = CURRENT_DATE"
     // pesquisa os clientes com agendamento para hoje
     // Dados da pesquisa:
     // Nome do cliente
@@ -77,9 +79,6 @@ server.get("/getResumo", async (request, reply) =>{
     // Servico
     // Telefone
 
-    // Fora que ele filtra para os agendamentos de Hoje
-    const query = "SELECT clientes.telefone, clientes.nome, horario, servico_valor.servico FROM agendamentos JOIN clientes ON clientes.telefone = client_id JOIN servico_valor ON servico_valor. id = servico_valor WHERE data_agendamento = CURRENT_DATE"
-    
     const {rows} = await db.query(query)
     reply.send(rows)
 })
@@ -114,16 +113,25 @@ server.post("/getAgendamentos", async (request, reply) =>{
         ordem = "DESC"
     }
 
-    // ORDER BY <coluna> ASC -> ordena em ordem crescente ou alfabetica.
-    // CURRENT_DATE + INTERVA: '7 days' => faz um calculo. O INTERVAL serve para adicionar masi dias.
-    const query = `SELECT clientes.telefone, clientes.nome, data_agendamento, servico_valor.servico, servico_valor.valor FROM agendamentos JOIN clientes ON clientes.telefone = client_id JOIN servico_valor ON servico_valor. id = servico_valor WHERE data_agendamento <= CURRENT_DATE + INTERVAL '${tempo} days' ORDER BY data_agendamento ${ordem}`
+    const queryFields = {
+        columns: "clientes.telefone, clientes.nome, data_agendamento, servico_valor.servico, servico_valor.valor",
+        join: "JOIN clientes ON clientes.telefone = client_id JOIN servico_valor ON servico_valor. id = servico_valor",
+
+        // CURRENT_DATE + INTERVA: '7 days' => faz um calculo. O INTERVAL serve para adicionar masi dias.
+        date: `WHERE data_agendamento <= CURRENT_DATE + INTERVAL '${tempo} days' AND data_agendamento >= CURRENT_DATE`,
+        
+        // ORDER BY <coluna> ASC -> ordena em ordem crescente ou alfabetica.
+        ordem: `ORDER BY data_agendamento ${ordem}`,
+    }
+
+    const query = `SELECT ${queryFields.columns} FROM agendamentos ${queryFields.join} ${queryFields.date} ${queryFields.ordem}`
     
     console.log("pesquisando!")
 
         const {rows} = await db.query(query)
         
         console.log("rows:")
-        // console.log(rows)
+        console.log(rows)
         console.log(ordem)
 
     reply.send(rows)
