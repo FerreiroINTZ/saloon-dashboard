@@ -1,8 +1,15 @@
 import style from "./agendamentos.module.css"
+import Filtros from "./filtros"
 
-async function agendamentos({nome, token}) {
+async function agendamentos({nome, token, servico, tempo, ordem}) {
 
-    const response = await fetch(`http://localhost:3001/getAgendamentos?nome=${nome}&token=${token}`)
+    const response = await fetch("http://localhost:3001/getAgendamentos", {
+      method: "POST",
+      headers:{
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({nome, token, servico, tempo, ordem})
+    })
 
     const data = await response.json()
 
@@ -53,7 +60,7 @@ async function agendamentos({nome, token}) {
   return (
     <main className="mains">
         <div className="title">
-        <h1>Agendamentos gerias</h1>
+        <h1>Agendamentos gerais</h1>
         <p className="today">{dataFormatada}</p>
       </div>
       <section className="sections">
@@ -77,7 +84,7 @@ async function agendamentos({nome, token}) {
             </div>
           </div>
         <div id={style["filter-list"]}>
-          <nav>asasasa</nav>
+          <Filtros servicos={contagemDeTermos} ordem={ordem}/>
           <div className="list">
             <ul>
               {data?.map((x, index) =>

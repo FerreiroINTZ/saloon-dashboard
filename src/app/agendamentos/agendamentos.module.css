@@ -3,11 +3,44 @@
     display: grid;
     gap: 10px;
 
-    nav{
+    #filter{
+        display: flex;
+        gap: 30px;
         padding: 15px 10px;
         background: var(--blue-color);
         color: white;
         border-radius: 5px;
+        font-size: 20px;
+
+        #ordem button{
+            background: none;
+            border: none;
+            border-bottom: 2px solid white;
+            font-size: 20px;
+            font-style: italic;
+            color: white;
+            margin-left: 10px;
+            cursor: pointer;
+        }
+
+        select{
+            background: none;
+            color: white;
+            border: none;
+            outline: none;
+            background: red;
+            font-style: italic;
+            font-size: 20px;
+            text-align: center;
+            font-family: 'Inter', sans-serif;
+            appearance: none;
+            
+            option{
+                font-style: normal;
+                background: white;
+                color: var(--text-color);
+            }
+        }
     }
 }
 
@@ -25,6 +58,9 @@
     }
 
     #lucro-total{
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
         /* background: red; */
         margin-top: 30px;
         white-space: nowrap;

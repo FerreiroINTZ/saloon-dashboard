@@ -2,12 +2,17 @@ import { redirect } from "next/navigation"
 import { cookies } from "next/headers"
 import Agendamentos from "./agendamentos"
 
-export default async function resumo(){
+export default async function resumo({searchParams}){
 
     const cookiesGeter = await cookies()
 
     const nome = cookiesGeter.get("nome")?.value
     const token = cookiesGeter.get("token")?.value
+    const queryParameters = await searchParams
+
+    const servico = queryParameters?.servico
+    const tempo = queryParameters?.tempo
+    const ordem = queryParameters?.ordem
 
     console.log("cookie")
     console.log(nome)
@@ -25,6 +30,11 @@ export default async function resumo(){
     }
 
     return (
-        <Agendamentos nome={nome} token={token}/>
+        <Agendamentos
+            nome={nome}
+            token={token}
+            servico={servico}
+            tempo={tempo}
+            ordem={ordem}/>
     )
 }
