@@ -84,16 +84,47 @@ server.get("/getResumo", async (request, reply) =>{
     reply.send(rows)
 })
 
-server.get("/getAgendamentos", async (request, reply) =>{
+server.post("/getAgendamentos", async (request, reply) =>{
     
-    const {nome} = request.query
-    const {token} = request.query
+    console.log("\nAgendamentos\n")
     
+    const {nome} = request.body
+    const {token} = request.body
+
+    let {servico} = request.body
+    let {tempo} = request.body
+    let {ordem} = request.body
+    
+    // caso nao tenha filtro de tempo, ou seja, valor = HOJE, entao ele nao filtra, praticamnte.
+    if(!tempo){
+        tempo = "0"
+    }
+
+    if(!servico){
+        servico = "servico_valor.servico"
+    }
+
+    if(ordem == "normal" || !ordem){
+        // crescente
+        ordem = "ASC"
+        console.log("FOI!")
+    }else{
+        // descrescente
+        console.log("DESCRESCENTE!")
+        ordem = "DESC"
+    }
 
     // ORDER BY <coluna> ASC -> ordena em ordem crescente ou alfabetica.
-    const query = "SELECT clientes.telefone, clientes.nome, data_agendamento, servico_valor.servico FROM agendamentos JOIN clientes ON clientes.telefone = client_id JOIN servico_valor ON servico_valor. id = servico_valor ORDER BY data_agendamento ASC"
+    // CURRENT_DATE + INTERVA: '7 days' => faz um calculo. O INTERVAL serve para adicionar masi dias.
+    const query = `SELECT clientes.telefone, clientes.nome, data_agendamento, servico_valor.servico, servico_valor.valor FROM agendamentos JOIN clientes ON clientes.telefone = client_id JOIN servico_valor ON servico_valor. id = servico_valor WHERE data_agendamento <= CURRENT_DATE + INTERVAL '${tempo} days' ORDER BY data_agendamento ${ordem}`
+    
+    console.log("pesquisando!")
 
-    const {rows} = await db.query(query)
+        const {rows} = await db.query(query)
+        
+        console.log("rows:")
+        // console.log(rows)
+        console.log(ordem)
 
     reply.send(rows)
 })
