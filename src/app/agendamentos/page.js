@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation"
 import { cookies } from "next/headers"
-import Resumo from "./resumo"
+import Agendamentos from "./agendamentos"
 
 export default async function resumo(){
 
@@ -25,6 +25,6 @@ export default async function resumo(){
     }
 
     return (
-        <Resumo nome={nome} token={token}/>
+        <Agendamentos nome={nome} token={token}/>
     )
 }

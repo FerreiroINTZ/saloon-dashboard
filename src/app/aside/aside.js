@@ -6,7 +6,7 @@ function aside() {
     <div id={style["dashboard-section"]}>
       <aside>
           <Link href="/resumo" className={style["aside-sections"]}>Resumo Geral</Link>
-          <Link href="/Agendamentos" className={style["aside-sections"]}>Agendamentos</Link>
+          <Link href="/agendamentos" className={style["aside-sections"]}>Agendamentos</Link>
           <Link href="/nada" className={style["aside-sections"]}>Historico</Link>
           <Link href="/nada" className={style["aside-sections"]}>Lucros Gerais</Link>
         </aside>

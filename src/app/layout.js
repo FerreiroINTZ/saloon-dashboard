@@ -1,4 +1,5 @@
-import "./globals.css";
+import "../styles/globals.css";
+import "../styles/pages.css";
 import "./notFound_InvalidAcess.css"
 import Aside from "./aside/aside"
 

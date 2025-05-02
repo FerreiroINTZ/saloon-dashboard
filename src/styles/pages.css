@@ -1,0 +1,124 @@
+.list{
+    display: grid;
+    flex-grow: 1;
+    grid-template-rows: auto 1fr auto;
+    background: var(--lightBlue-color);
+    padding: 30px 10px 20px 10px;
+    height: 500px;
+    box-shadow: 4px 4px 10px 0px rgba(0, 0, 0, .25);
+
+    h3{
+        text-align: center;
+        font-size: 50px;
+        font-weight: 800;
+    }
+    
+    ul{
+        display: flex;
+        flex-direction: column;
+        padding: 0px 20px 30px 20px;
+        gap: 15px;
+        margin-top: 20px;
+        /* background: red; */
+        flex-grow: 1;
+        overflow-y: auto;
+        overflow-x: visible;
+        margin-bottom: 20px;
+        /* background: red; */
+        box-shadow: inset 0px -10px 10px 0px rgba(0, 0, 0, .25);
+
+        &::-webkit-scrollbar{
+            width: 5px;
+            background: none;
+        }
+
+        &::-webkit-scrollbar-thumb{
+            background: var(--blue-color);
+            border-radius: 100px;
+        }
+
+        li{
+            display: grid;
+            gap: 60px;
+            grid-template-columns: repeat(4, 1fr);
+            list-style: none;
+            background: var(--blue-color);
+            color: white;
+            padding: 15px 20px;
+            font-size: 30px;
+            transition: .3s;
+            
+            &:hover{
+                transform: scale(1.025);
+            }
+
+            .lista-nome{
+                font-weight: 600;
+            }
+
+            .lista-telefone{
+                white-space: nowrap;
+                font-weight: 600;
+            }
+
+            .lista-servico{
+                font-weight: 600;
+                text-align: center;
+            }
+            
+            .lista-horario{
+                font-weight: 600;
+                text-align: end;
+            }
+        }
+    }
+}
+
+.mains{
+    /* align-self: center; */
+    /* Descomentar apos terminar a secao. Isso alinhara o conteudo no centro */
+    flex-grow: 1;
+    flex-direction: column;
+    padding-left: 100px;
+    margin-top: 20px;
+    /* align-items: center; */
+    display: flex;
+    gap: 30px;
+    /* background: red; */
+
+    .title{
+        
+        .today{
+            text-align: center;
+            font-size: 28px;
+            color: var(--text-color);
+            font-style: italic;
+        }
+    }
+
+    .sections{
+        display: flex;
+        gap: 30px;
+        /* background: red; */
+        color: var(--text-color);
+        margin-right: 150px;
+
+        .infos-container{
+            background: var(--lightBlue-color);
+            width: 100%;
+            box-shadow: 4px 4px 10px 0px rgba(0, 0, 0, .25);
+            padding: 25px 30px;
+            
+            h3{
+                font-size: 30px;
+            }
+        }
+        .infos-wraper{
+            display: grid;
+            grid-template-rows: auto 1fr;
+            gap: 30px;
+            background: green;
+
+        }
+    }
+}
