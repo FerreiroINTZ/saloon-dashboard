@@ -78,9 +78,23 @@ server.get("/getResumo", async (request, reply) =>{
     // Telefone
 
     // Fora que ele filtra para os agendamentos de Hoje
-    const query = "SELECT clientes.telefone, clientes.nome, horario, servico_valor.servico FROM agendamentos JOIN clientes ON clientes.telefone = client_id JOIN servico_valor ON servico_valor. id = servico_valor WHERE data_agendamento <= CURRENT_DATE"
+    const query = "SELECT clientes.telefone, clientes.nome, horario, servico_valor.servico FROM agendamentos JOIN clientes ON clientes.telefone = client_id JOIN servico_valor ON servico_valor. id = servico_valor WHERE data_agendamento = CURRENT_DATE"
+    
+    const {rows} = await db.query(query)
+    reply.send(rows)
+})
+
+server.get("/getAgendamentos", async (request, reply) =>{
+    
+    const {nome} = request.query
+    const {token} = request.query
+    
+
+    // ORDER BY <coluna> ASC -> ordena em ordem crescente ou alfabetica.
+    const query = "SELECT clientes.telefone, clientes.nome, data_agendamento, servico_valor.servico FROM agendamentos JOIN clientes ON clientes.telefone = client_id JOIN servico_valor ON servico_valor. id = servico_valor ORDER BY data_agendamento ASC"
 
     const {rows} = await db.query(query)
+
     reply.send(rows)
 })
 
