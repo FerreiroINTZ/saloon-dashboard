@@ -99,7 +99,6 @@ server.post("/getAgendamentos", async (request, reply) =>{
         tempo = "0"
     }else{
         tempo = Number(tempo) * 7
-        tempo = tempo
     }
 
     if(!servico){
@@ -143,13 +142,43 @@ server.post("/getAgendamentos", async (request, reply) =>{
 server.post("/getHistory", async (request,reply) =>{
     console.log("Get History ")
     
-    const {nome} = request
-    const {token} = request
+    const {nome} = request.body
+    const {token} = request.body
 
-    const query = "SELECT agendamentos.id, clientes.nome, clientes.telefone, servico_valor.servico, data_agendamento, estatus FROM agendamentos JOIN clientes ON clientes.telefone = client_id JOIN servico_valor ON servico_valor.id = servico_valor WHERE data_agendamento < CURRENT_DATE ORDER BY data_agendamento DESC"
+    let {tempo} = request.body
+    let {ordem} = request.body
+    let {servico} = request.body
+
+    if(ordem == "normal" || !ordem){
+        ordem = "DESC"
+    }else{
+        ordem = "ASC"
+    }
+    
+    console.log(tempo)
+    if(!tempo){
+        tempo = "1"
+    }else{
+        tempo = Number(tempo) * 7
+    }
+
+    const queryFields = {
+        columns: "agendamentos.id, clientes.nome, clientes.telefone, servico_valor.servico, data_agendamento, estatus",
+        join: "JOIN clientes ON clientes.telefone = client_id JOIN servico_valor ON servico_valor.id = servico_valor",
+
+        // CURRENT_DATE + INTERVAL: '7 days' => faz um calculo. O INTERVAL serve para adicionar masi dias.
+        date: `data_agendamento >= CURRENT_DATE - INTERVAL '${tempo} days' AND data_agendamento < CURRENT_DATE`,
+        
+        // ORDER BY <coluna> ASC -> ordena em ordem crescente ou alfabetica.
+        ordem: `ORDER BY data_agendamento ${ordem}`,
+    }
+
+    const query = `SELECT ${queryFields.columns} FROM agendamentos ${queryFields.join} WHERE ${queryFields.date} ${queryFields.ordem}`
 
     const {rows} = await db.query(query)
-    console.log(rows)
+    // console.log(rows)
+    console.log(ordem)
+    console.log(tempo)
 
     reply.send(rows)
 })
@@ -172,7 +201,6 @@ server.get("/setStatus/:id", async (request, reply) =>{
     console.log(rows)
 
     reply.send(rows)
-    reply.send({id})
 })
 
 server.listen({port: 3001})
