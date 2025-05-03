@@ -1,5 +1,5 @@
 import style from "./agendamentos.module.css"
-import Filtros from "./filtros"
+import Filtros from "../agend_historico-filtro/filtros"
 
 async function agendamentos({nome, token, servico, tempo, ordem}) {
 
@@ -83,8 +83,8 @@ async function agendamentos({nome, token, servico, tempo, ordem}) {
               </div>
             </div>
           </div>
-        <div id={style["filter-list"]}>
-          <Filtros servicos={contagemDeTermos} ordem={ordem}/>
+        <div className="filter-list">
+          <Filtros servicos={contagemDeTermos} tempo={tempo} ordem={ordem}/>
           <div className="list">
             <ul>
               {data?.map((x, index) =>
