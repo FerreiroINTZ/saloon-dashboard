@@ -6,8 +6,6 @@ import { useRouter } from "next/navigation"
 function BTNs({id}) {
   const router = useRouter()
 
-  console.log("id: ", id)
-
   async function changeState(vall){
     console.log("Mudancas serao feitas")
     console.log(vall)

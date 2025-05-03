@@ -84,7 +84,7 @@ async function agendamentos({nome, token, servico, tempo, ordem}) {
             </div>
           </div>
         <div className="filter-list">
-          <Filtros servicos={contagemDeTermos} tempo={tempo} ordem={ordem}/>
+          <Filtros servicos={contagemDeTermos} section={"Hoje"} ordem={ordem}/>
           <div className="list">
             <ul>
               {data?.map((x, index) =>

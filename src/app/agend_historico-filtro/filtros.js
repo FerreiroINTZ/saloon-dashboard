@@ -4,7 +4,7 @@ import { useEffect } from "react"
 import style from "../agend_historico-filtro/filtro.module.css"
 import { usePathname, useRouter, useSearchParams } from "next/navigation"
 
-function filtros({servicos, tempo, ordem}) {
+function filtros({servicos, section, ordem}) {
 
     const router = useRouter()
     const pathName = usePathname()
@@ -47,7 +47,7 @@ function filtros({servicos, tempo, ordem}) {
                     x == 0
                     ? (
                         <>
-                            <option key={x} value="">Hoje</option>
+                            <option key={x} value="">{section}</option>
                         </>
                     )
                     : <option key={x} value={x}>{x} {x == 1 ? "Semana" : "Semanas"}</option>

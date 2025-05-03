@@ -3,17 +3,25 @@ import style from "./historico.module.css"
 import Filtros from "../agend_historico-filtro/filtros"
 import ActionsBTNs from "./actionBTNs"
 
-async function historico({nome, token}) {
+async function historico({nome, token, ordem, tempo}) {
 
     const response = await fetch("http://localhost:3001/getHistory", {
         method: "POST",
         headers:{
             "Content-Type": "application/json"
         },
-        body: JSON.stringify({nome, token})
+        body: JSON.stringify({nome, token, ordem, tempo})
     })
 
     const historicoList = await response.json()
+
+    const servicosFilter = []
+    historicoList.map(x => servicosFilter.includes(x.servico) ? null : servicosFilter.push(x.servico))
+
+    console.log(servicosFilter.includes(historicoList[0].servico))
+
+    console.log("servicos: ")
+    console.log(servicosFilter)
 
     const agora = new Date();
 
@@ -29,9 +37,6 @@ async function historico({nome, token}) {
     // Formata a data com base no idioma (aqui: pt-BR para português do Brasil)
     const dataFormatada = agora.toLocaleString('pt-BR', opcoes);
 
-    console.log("historicoList")
-    console.log(response.status)
-    console.log(historicoList)
   return (
     <main className="mains">
         <div className="title">
@@ -40,7 +45,7 @@ async function historico({nome, token}) {
       </div>
       <section className="sections">
         <div className="filter-list">
-          <Filtros servicos={[]} tempo={""} ordem={""}/>
+          <Filtros servicos={servicosFilter} ordem={ordem} section={"Ontem"}/>
           <div className="list">
             <ul id={style.ulHistory}>
               {historicoList?.map((x, index) =>
