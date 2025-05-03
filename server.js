@@ -97,6 +97,9 @@ server.post("/getAgendamentos", async (request, reply) =>{
     // caso nao tenha filtro de tempo, ou seja, valor = HOJE, entao ele nao filtra, praticamnte.
     if(!tempo){
         tempo = "0"
+    }else{
+        tempo = Number(tempo) * 7
+        tempo = tempo
     }
 
     if(!servico){
@@ -118,23 +121,35 @@ server.post("/getAgendamentos", async (request, reply) =>{
         join: "JOIN clientes ON clientes.telefone = client_id JOIN servico_valor ON servico_valor. id = servico_valor",
 
         // CURRENT_DATE + INTERVA: '7 days' => faz um calculo. O INTERVAL serve para adicionar masi dias.
-        date: `WHERE data_agendamento <= CURRENT_DATE + INTERVAL '${tempo} days' AND data_agendamento >= CURRENT_DATE`,
+        date: `data_agendamento <= CURRENT_DATE + INTERVAL '${tempo} days' AND data_agendamento >= CURRENT_DATE`,
         
         // ORDER BY <coluna> ASC -> ordena em ordem crescente ou alfabetica.
         ordem: `ORDER BY data_agendamento ${ordem}`,
     }
 
-    const query = `SELECT ${queryFields.columns} FROM agendamentos ${queryFields.join} ${queryFields.date} ${queryFields.ordem}`
+    const query = `SELECT ${queryFields.columns} FROM agendamentos ${queryFields.join} WHERE ${queryFields.date} ${queryFields.ordem}`
     
     console.log("pesquisando!")
 
         const {rows} = await db.query(query)
         
         console.log("rows:")
-        console.log(rows)
+        // console.log(rows)
         console.log(ordem)
 
     reply.send(rows)
+})
+
+server.post("/getHistory", async (request,reply) =>{
+    
+    const {nome} = request
+    const {token} = request
+
+    const query = "SELECT "
+
+    const {rows} = db.query(query)
+    
+    reply.send({rows: historico})
 })
 
 server.listen({port: 3001})
