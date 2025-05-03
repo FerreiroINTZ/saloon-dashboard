@@ -120,7 +120,7 @@ server.post("/getAgendamentos", async (request, reply) =>{
         columns: "clientes.telefone, clientes.nome, data_agendamento, servico_valor.servico, servico_valor.valor",
         join: "JOIN clientes ON clientes.telefone = client_id JOIN servico_valor ON servico_valor. id = servico_valor",
 
-        // CURRENT_DATE + INTERVA: '7 days' => faz um calculo. O INTERVAL serve para adicionar masi dias.
+        // CURRENT_DATE + INTERVAL: '7 days' => faz um calculo. O INTERVAL serve para adicionar masi dias.
         date: `data_agendamento <= CURRENT_DATE + INTERVAL '${tempo} days' AND data_agendamento >= CURRENT_DATE`,
         
         // ORDER BY <coluna> ASC -> ordena em ordem crescente ou alfabetica.
@@ -141,15 +141,38 @@ server.post("/getAgendamentos", async (request, reply) =>{
 })
 
 server.post("/getHistory", async (request,reply) =>{
+    console.log("Get History ")
     
     const {nome} = request
     const {token} = request
 
-    const query = "SELECT "
+    const query = "SELECT agendamentos.id, clientes.nome, clientes.telefone, servico_valor.servico, data_agendamento, estatus FROM agendamentos JOIN clientes ON clientes.telefone = client_id JOIN servico_valor ON servico_valor.id = servico_valor WHERE data_agendamento < CURRENT_DATE ORDER BY data_agendamento DESC"
 
-    const {rows} = db.query(query)
+    const {rows} = await db.query(query)
+    console.log(rows)
+
+    reply.send(rows)
+})
+
+server.get("/setStatus/:id", async (request, reply) =>{
+    console.log("Set estatus")
     
-    reply.send({rows: historico})
+    const {id} = request.params
+    const {estatus} = request.query
+    
+    console.log("dados: ")
+    console.log(id)
+    console.log(estatus)
+    
+    const query = `UPDATE agendamentos SET estatus = '${estatus}' WHERE id = ${id}`
+    
+    const {rows} = await db.query(query)
+    
+    console.log("rows: ")
+    console.log(rows)
+
+    reply.send(rows)
+    reply.send({id})
 })
 
 server.listen({port: 3001})
