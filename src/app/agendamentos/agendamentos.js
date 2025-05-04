@@ -10,6 +10,9 @@ async function agendamentos({nome, token, servico, tempo, ordem}) {
       },
       body: JSON.stringify({nome, token, servico, tempo, ordem})
     })
+    const responseFreeDays = await fetch(`http://localhost:3001/getFreeDays?tempo=${tempo}`)
+
+    const freeDays = await responseFreeDays.json()
 
     const data = await response.json()
 
@@ -78,13 +81,13 @@ async function agendamentos({nome, token, servico, tempo, ordem}) {
               <div id={style['dias-livres_container']}>
                 <p id={style["dias-livres_title"]}>Dias Livres</p>
                 <ul id={style["dias-livres_days"]}>
-                  <li>00/00</li>
+                  {freeDays?.map(x => <li>{x.dia.slice(5, 10).replace(/-/, "/")}</li>)}
                 </ul>
               </div>
             </div>
           </div>
         <div className="filter-list">
-          <Filtros servicos={contagemDeTermos} section={"Hoje"} ordem={ordem}/>
+          <Filtros servicos={contagemDeTermos} section={"Hoje"} ordem={ordem} tempo={tempo}/>
           <div className="list">
             <ul>
               {data?.map((x, index) =>

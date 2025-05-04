@@ -1,6 +1,8 @@
 
 
 #infos-container{
+    display: grid;
+    grid-template-rows: auto auto 1fr;
     flex-grow: 0;
     width: fit-content;
     background: var(--blue-color);
@@ -38,14 +40,22 @@
 
     #servico-mais-pedido_dias-livres{
         display: grid;
+        grid-template-rows: auto 1fr;
         gap: 20px;
         width: 225px;
         margin-left: auto;
         margin-right: auto;
         margin-top: 15px;
         
+        #dias-livres_container{
+            grid-template-rows: auto 1fr;
+            align-content: start;
+            padding: 10px;
+        }
+
         #servico-mais-pedido_container, #dias-livres_container{
             display: grid;
+            max-width: 100%;
             gap: 10px;
             font-weight: 600;
             
@@ -55,7 +65,31 @@
             }
 
             #dias-livres_days{
+                display: flex;
+                flex-wrap: wrap;
+                justify-content: space-around;
+                width: 100%;
+                max-height: 150px;
+                overflow-y: auto;
+                gap: 10px;
                 list-style: none;
+                height: 100%;
+                box-shadow: inset 0px 0px 10px 0px rgba(0, 0, 0, .5);
+                padding: 10px;
+
+                &::-webkit-scrollbar{
+                    width: 5px;
+                    background: none;
+                }
+                
+                &::-webkit-scrollbar-thumb{
+                    border-radius: 10px;
+                    background: white;
+                }
+                
+                li{
+                    height: fit-content;
+                }
             }
 
             #servico-mais-pedido_service, #dias-livres_days{

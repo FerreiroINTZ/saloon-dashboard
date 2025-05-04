@@ -4,7 +4,7 @@ import { useEffect } from "react"
 import style from "../agend_historico-filtro/filtro.module.css"
 import { usePathname, useRouter, useSearchParams } from "next/navigation"
 
-function filtros({servicos, section, ordem}) {
+function filtros({servicos, section, ordem, tempo}) {
 
     const router = useRouter()
     const pathName = usePathname()
@@ -41,8 +41,11 @@ function filtros({servicos, section, ordem}) {
         </span>
         <span>
             <label htmlFor="select">Tempo:</label>
-            <select 
-                id={`${style['select-filter']} select`}  name="tempo" onChange={(e) => handleQueryParameters(e.target.name, e.target.value)}>
+            <select
+                value={tempo} 
+                id={`${style['select-filter']} select`}
+                name="tempo" 
+                onChange={(e) => handleQueryParameters(e.target.name, e.target.value)}>
                 {[...Array(5).keys()].map(x =>
                     x == 0
                     ? (
