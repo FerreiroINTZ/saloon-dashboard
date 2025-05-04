@@ -69,16 +69,23 @@ server.get("/getResumo", async (request, reply) =>{
     const {token} = request.query
     console.log(nome)
     console.log(token)
-
+    
+    const queryFilters = {
+        columns: "clientes.telefone, clientes.nome, horario, servico_valor.servico, estatus, agendamentos.id",
+        join: "JOIN clientes ON clientes.telefone = client_id JOIN servico_valor ON servico_valor. id = servico_valor",
+        data: "data_agendamento = CURRENT_DATE"
+    }
+    
     // Fora que ele filtra para os agendamentos de Hoje
-    const query = "SELECT clientes.telefone, clientes.nome, horario, servico_valor.servico FROM agendamentos JOIN clientes ON clientes.telefone = client_id JOIN servico_valor ON servico_valor. id = servico_valor WHERE data_agendamento = CURRENT_DATE"
+    const query = `SELECT ${queryFilters.columns} FROM agendamentos ${queryFilters.join} WHERE ${queryFilters.data}`
     // pesquisa os clientes com agendamento para hoje
     // Dados da pesquisa:
     // Nome do cliente
     // Horario
     // Servico
     // Telefone
-
+    
+    console.log(query)
     const {rows} = await db.query(query)
     reply.send(rows)
 })
