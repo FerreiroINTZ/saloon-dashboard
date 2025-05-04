@@ -1,6 +1,6 @@
 "use client"
 
-import style from "./historico.module.css"
+import style from "./actionsBTNs.module.css"
 import { useRouter } from "next/navigation"
 
 function BTNs({id}) {

@@ -47,7 +47,7 @@
             padding: 15px 20px;
             font-size: 30px;
             transition: .3s;
-            
+
             &:hover{
                 transform: scale(1.025);
             }

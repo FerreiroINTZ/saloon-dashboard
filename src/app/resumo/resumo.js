@@ -1,5 +1,6 @@
 import style from "./resumo.module.css"
 import Link from "next/link"
+import ActionsBTNs from "../actionsBTNs/actionBTNs"
 
 async function resumo({nome, token}) {
 
@@ -63,12 +64,16 @@ console.log(dataFormatada);
           <h3>Horarios:</h3>
           <ul>
             {data.map((x, index) =>
-              <li key={index}>
-                <p className="lista-nome">{x.nome}</p>
-                <p className="lista-telefone">{x.telefone}</p>
-                <p className="lista-servico">{x.servico}</p>
-                <p className="lista-horario">{x.horario.slice(0, 5)}</p>
-              </li>
+               <li 
+                className={style.ListaDeClientes}
+                key={index} 
+                style={x.estatus == "completo" ? {backgroundColor: "var(--servico-completo)"} : x.estatus == "cancelado" ? {backgroundColor: "var(--servico-incompleto)"} : null}>
+               <p className="lista-nome">{x.nome}</p>
+               <p className="lista-telefone">{x.telefone}</p>
+               <p className="lista-servico">{x.servico}</p>
+               <p className="lista-horario">{x.horario.slice(0, 5)}</p>
+               <ActionsBTNs id={x.id}/>
+             </li>
             )}
           </ul>
           <Link href="/agendamentos">Ver agenda completa</Link>

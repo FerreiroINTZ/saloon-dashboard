@@ -2,52 +2,5 @@
     
     li{
         grid-template-columns: repeat(5, 1fr);
-
-        .actBTNs{
-            display: flex;
-            gap: 10px;
-            align-items: center;
-            width: fit-content;
-            
-            .actBTN-imgs{
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                width: 35px;
-                height: 35px;
-                border-radius: 5px;
-                cursor: pointer;
-                transition: .3s;
-                border: none;
-                
-                &:hover{
-                    transform: scale(1.1);
-                }
-                
-                #complete{
-                    width: 100%;
-                    height: 100%;
-                    background: rgb(0, 66, 0);
-                    mask: URL("../../../public/imgs/completar.png") no-repeat center;
-                    mask-size: contain;
-                }
-
-                #cancel{
-                    width: 80%;
-                    height: 80%;
-                    background: rgb(94, 0, 0);
-                    mask: URL("../../../public/imgs/cancelar.png") no-repeat center;
-                    mask-size: contain;
-                }
-
-                #desconsiderar{
-                    width: 80%;
-                    height: 80%;
-                    background: rgb(194, 194, 194);
-                    mask: URL("../../../public/imgs/desconsiderar.png") no-repeat center;
-                    mask-size: contain;
-                }
-            }
-        }
     }
 }

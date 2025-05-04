@@ -1,7 +1,7 @@
 // import style from "./historico.module.css"
 import style from "./historico.module.css"
 import Filtros from "../agend_historico-filtro/filtros"
-import ActionsBTNs from "./actionBTNs"
+import ActionsBTNs from "../actionsBTNs/actionBTNs"
 
 async function historico({nome, token, ordem, tempo}) {
 

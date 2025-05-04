@@ -69,3 +69,13 @@
             align-self: end;
         }
     }
+
+    .ListaDeClientes{
+        grid-template-columns: repeat(5, 1fr) !important;
+        gap: 10px !important;
+        background: red;
+
+        div{
+            justify-self: end;
+        }
+    }
