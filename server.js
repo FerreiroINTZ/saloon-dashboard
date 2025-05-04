@@ -203,4 +203,93 @@ server.get("/setStatus/:id", async (request, reply) =>{
     reply.send(rows)
 })
 
+    server.post("/lucros", async (request, reply) =>{
+        console.log("\nLucros\n")
+
+        // const {nome, token} = request.body
+
+        let {tempo} = request.body
+        let {estado} = request.body
+
+        console.log("Vars: ")
+        console.log(tempo)
+        console.log(estado)
+        
+        if(!tempo || typeof(tempo) === "undefined" || tempo == "ontem"){
+            console.log("Nada!")
+            time = 1
+        }else{
+            console.log("Tudo!")
+            time = Number(tempo) * 7
+        }
+
+        if(!estado || estado == "todos"){
+            estado = "estatus != 'agendado'"
+        }else{
+            estado = `estatus = '${estado}'`
+        }
+        console.log("Apos a mudanca: ")
+        console.log(tempo)
+        console.log(estado)
+
+        const queryFilters = {
+            columns: "c.nome, c.telefone, sv.servico, sv.valor, estatus",
+            join: "JOIN clientes c ON c.telefone = client_id JOIN servico_valor sv ON sv.id = servico_valor",
+            data: `data_agendamento <= CURRENT_DATE AND data_agendamento >= CURRENT_DATE - INTERVAL '${time} days'`
+        }
+
+        const query = `SELECT ${queryFilters.columns} FROM agendamentos ${queryFilters.join} WHERE ${estado} AND ${queryFilters.data}`
+
+        console.log(query)
+        
+        const {rows} = await db.query(query)
+        
+        console.log("rows: ")
+        console.log(rows[0])
+        
+        reply.send(rows)
+    })
+    
+    server.get("/getFreeDays", async (request, reply) => {
+        console.log("\nGet Free Days\n");
+    
+        let tempoBruto = request.query?.tempo;
+        let tempo = Number(tempoBruto);
+    
+        console.log("tempo bruto:", tempoBruto);
+        console.log("convertido:", tempo);
+    
+        if (isNaN(tempo) || tempo <= 0) {
+            tempo = 1;
+        }
+    
+        if (tempo > 1) {
+            tempo *= 7;
+        }
+    
+        console.log("tempo final (em dias):", tempo);
+    
+        const query = `
+            WITH dias AS (
+                SELECT generate_series(
+                    CURRENT_DATE, 
+                    CURRENT_DATE + INTERVAL '${tempo} days', 
+                    INTERVAL '1 day'
+                )::date AS dia
+            )
+            SELECT d.dia
+            FROM dias d
+            LEFT JOIN agendamentos a ON d.dia = a.data_agendamento
+            WHERE a.data_agendamento IS NULL
+        `;
+    
+        const { rows } = await db.query(query);
+    
+        console.log("rows: ");
+        console.log(rows);
+    
+        reply.send(rows);
+    });
+    
+
 server.listen({port: 3001})
