@@ -397,7 +397,7 @@ server.get("/getClientToken/:token/agendamentos/changePhoneNumber/:telefone", as
 server.get("/getClientToken/:token/agendamentos/getAgendamentos/", async (request, reply) =>{
   const {token} = request.params
 
-  const queryString = "SELECT data_agendamento, horario, sv.servico, sv.valor FROM agendamentos JOIN servico_valor sv ON sv.id = servico_valor WHERE client_id = $1"
+  const queryString = "SELECT data_agendamento, horario, sv.servico, sv.valor FROM agendamentos JOIN servico_valor sv ON sv.id = servico_valor WHERE client_id = $1 ORDER BY data_agendamento ASC, horario ASC"
   const {rows: agendamentos} = await db.query(queryString, [token])
 
   console.log(agendamentos)
@@ -410,14 +410,23 @@ server.post("/getClientToken/:token/agendamentos/send", async (request, reply) =
   const {token} = request.params
   const fields = JSON.parse(request.body)
 
-  // cria o agendamento
-  const insertAgendemtnoQuery = "INSERT INTO agendamentos(data_agendamento, horario, servico_valor, client_id) VALUES ($1, $2, (SELECT id FROM servico_valor WHERE servico = $3), $4,)"
-  let agendametoInserido = await db.query(createUserQuery, [fields.dia, fields.horario, fields.servico, fields.telefone])
+  try{
+    // cria o agendamento
+    const insertAgendemtnoQuery = "INSERT INTO agendamentos(data_agendamento, horario, servico_valor, client_id) VALUES ($1, $2, (SELECT id FROM servico_valor WHERE servico = $3), $4) RETURNING *"
+    let {rows: agendametoInserido} = await db.query(insertAgendemtnoQuery, [fields.dia, fields.horario, fields.servico, fields.id])
+    console.log("fields: ")
+    console.log(fields)
+    console.log(agendametoInserido)
+    reply.send(agendametoInserido)
 
+  }catch(e){
+  console.log(e)
   console.log("fields: ")
   console.log(fields)
-  console.log(agendametoInserido.rows)
-  reply.send(agendametoInserido.rows)
+  reply.send(e)
+  }
+
+
 })
 
 server.listen({ port: 3001 });
