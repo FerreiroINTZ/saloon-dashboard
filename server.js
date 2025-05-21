@@ -337,7 +337,7 @@ server.get("/getClientToken/:token", async (request, reply) => {
   reply.header("Content-Type", "application/json; charset=utf-8").send(rows[0]);
 });
 
-// recolhe os dadaos para a rota de agendamentos
+// recolhe os dadaos para a rota de agendamentos (no caso, os servicos e seus valores)
 server.get("/getClientToken/:token/agendamentos", async (request, reply) =>{
   const {token} = request.params
 
@@ -355,11 +355,12 @@ server.post("/getClientToken/:token/agendamentos/getClientData", async (request,
   // const {nome, email, uid} = request.body
   const {name, email, uid, phoneNumber} = JSON.parse(request.body)
 
-  const {rows: verifiUserExist} = await db.query("SELECT id FROM clientes WHERE id = $1", [token])
+  const {rows: verifiUserExist} = await db.query("SELECT * FROM clientes WHERE id = $1", [token])
 
   console.log("verifiUserExist: ")
   console.log(verifiUserExist)
 
+  // ele retornar uma arrau vazia, significa que o usuario nao existe
   if(!verifiUserExist.length){
     try{
       const insertUserQuery = "INSERT INTO clientes(id, nome, email) VALUES ($1, $2, $3) RETURNING *"
@@ -374,21 +375,7 @@ server.post("/getClientToken/:token/agendamentos/getClientData", async (request,
     }
   }
 
-  if(!phoneNumber){
-    // code 301 indica que o telefone precisa ser cadastrado
-    console.log("skodsidjwi0fj w8ehfwefhuw9e ehuw9fhewufhnwuf")
-    reply.send({text: "Need to write Phone number"})
-  }else{
-    const queryAgendamentosFeitos = "SELECT data_agendamento, horario, sv.servico, sv.valor FROM agendamentos JOIN servico_valor sv ON sv.id = servico_valor WHERE client_id = $1;"
-  
-    const {rows: agendamentosFeitos} = await db.query(queryAgendamentosFeitos, [token])
-    
-    console.log("agendamentosFeitos: ")
-    console.log(agendamentosFeitos)
-  
-    // code 301 indica que o telefone NAO precisa ser cadastrado
-    reply.send(agendamentosFeitos)
-  }
+  reply.send(verifiUserExist[0])
   
 })
 
