@@ -321,7 +321,7 @@ server.get("/getClientToken/:token", async (request, reply) => {
   console.log("token: ");
   console.log(token);
 
-  const query ="SELECT content, p.modelo FROM site_content JOIN proprietarios p ON p.client_token = proprietario_client_token WHERE proprietario_client_token = $1";
+  const query ="SELECT content, p.modelo, p.salao FROM site_content JOIN proprietarios p ON p.client_token = proprietario_client_token WHERE proprietario_client_token = $1";
   // const query ="SELECT texto FROM site_content WHERE id = 10";
 
   const { rows } = await db.query(query, [token]);
@@ -336,5 +336,101 @@ server.get("/getClientToken/:token", async (request, reply) => {
 
   reply.header("Content-Type", "application/json; charset=utf-8").send(rows[0]);
 });
+
+// recolhe os dadaos para a rota de agendamentos
+server.get("/getClientToken/:token/agendamentos", async (request, reply) =>{
+  const {token} = request.params
+
+  // pega os servisoe e seus vaolores relacionado ao token do client, alem do nome e logo do salao.
+  const queryString = `SELECT servico, valor FROM servico_valor JOIN proprietarios p ON (SELECT token FROm proprietarios WHERE client_token = $1) = proprietario_id WHERE $1 = p.client_token;`
+
+  const {rows} = await db.query(queryString, [token])
+
+  reply.send({rows})
+})
+
+// responsavel por salvar os dados do usuario, caso nao exista.
+server.post("/getClientToken/:token/agendamentos/getClientData", async (request, reply) =>{
+  const {token} = request.params
+  // const {nome, email, uid} = request.body
+  const {name, email, uid, phoneNumber} = JSON.parse(request.body)
+
+  const {rows: verifiUserExist} = await db.query("SELECT id FROM clientes WHERE id = $1", [token])
+
+  console.log("verifiUserExist: ")
+  console.log(verifiUserExist)
+
+  if(!verifiUserExist.length){
+    try{
+      const insertUserQuery = "INSERT INTO clientes(id, nome, email) VALUES ($1, $2, $3) RETURNING *"
+  
+      const {rows: userInserted} = await db.query(insertUserQuery, [token, name, email])
+  
+      console.log(userInserted)
+
+    }catch (e){
+      console.log("Deu algum eror na hora de salvar!")
+      console.log(e)
+    }
+  }
+
+  if(!phoneNumber){
+    // code 301 indica que o telefone precisa ser cadastrado
+    console.log("skodsidjwi0fj w8ehfwefhuw9e ehuw9fhewufhnwuf")
+    reply.send({text: "Need to write Phone number"})
+  }else{
+    const queryAgendamentosFeitos = "SELECT data_agendamento, horario, sv.servico, sv.valor FROM agendamentos JOIN servico_valor sv ON sv.id = servico_valor WHERE client_id = $1;"
+  
+    const {rows: agendamentosFeitos} = await db.query(queryAgendamentosFeitos, [token])
+    
+    console.log("agendamentosFeitos: ")
+    console.log(agendamentosFeitos)
+  
+    // code 301 indica que o telefone NAO precisa ser cadastrado
+    reply.send(agendamentosFeitos)
+  }
+  
+})
+
+// responsavel por atualizar o numero de telefone do usuario
+server.get("/getClientToken/:token/agendamentos/changePhoneNumber/:telefone", async (request, reply) =>{
+  const {token} = request.params
+  const {telefone} = request.params
+
+  const queryString = "UPDATE clientes SET telefone = $1 WHERE id = $2 RETURNING *"
+  const {rows} = await db.query(queryString, [telefone, token])
+
+  console.log("Dados Atualizados: ")
+  console.log(rows)
+
+  reply.send(rows[0])
+})
+
+// rota responsavel por buscar os agendamentos
+server.get("/getClientToken/:token/agendamentos/getAgendamentos/", async (request, reply) =>{
+  const {token} = request.params
+
+  const queryString = "SELECT data_agendamento, horario, sv.servico, sv.valor FROM agendamentos JOIN servico_valor sv ON sv.id = servico_valor WHERE client_id = $1"
+  const {rows: agendamentos} = await db.query(queryString, [token])
+
+  console.log(agendamentos)
+
+  reply.send(agendamentos)
+})
+
+// salva o agendamente e/ou cria o usuario, com base no telefone
+server.post("/getClientToken/:token/agendamentos/send", async (request, reply) =>{
+  const {token} = request.params
+  const fields = JSON.parse(request.body)
+
+  // cria o agendamento
+  const insertAgendemtnoQuery = "INSERT INTO agendamentos(data_agendamento, horario, servico_valor, client_id) VALUES ($1, $2, (SELECT id FROM servico_valor WHERE servico = $3), $4,)"
+  let agendametoInserido = await db.query(createUserQuery, [fields.dia, fields.horario, fields.servico, fields.telefone])
+
+  console.log("fields: ")
+  console.log(fields)
+  console.log(agendametoInserido.rows)
+  reply.send(agendametoInserido.rows)
+})
 
 server.listen({ port: 3001 });
