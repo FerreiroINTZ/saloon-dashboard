@@ -2,6 +2,7 @@ const server = require("fastify")();
 const { Pool, types } = require("pg");
 const cookies = require("@fastify/cookie");
 const cors = require("@fastify/cors");
+require("dotenv").config()
 
 console.log("Servidor no Ar!");
 
@@ -18,14 +19,24 @@ server.register(cors, {
 // O OID 3802 corresponde ao tipo JSONB
 // types.setTypeParser(3802, (val) => val);
 
-const db = new Pool({
+const connection = process.env.DATABASE_URL
+  ? {
+      connectionString: process.env.DATABASE_URL, 
+      ssl: {
+        rejectUnauthorized: false
+      }
+    }
+  : {
   user: "postgres",
   host: "localhost",
   database: "saloon_dashboard",
   password: "2006",
   port: "5432",
   client_encoding: "UTF8",
-});
+  
+}
+
+const db = new Pool(connection)
 
 db.connect().then(() => db.query("SET client_encoding  = 'UTF8';"))
 
@@ -36,6 +47,11 @@ const data = async () => {
 };
 
 data();
+
+
+
+// ================================= Sobre o Dashboard =====================================
+
 
 // autenticacao do dasboard
 server.get("/get/:user", async (request, reply) => {
@@ -107,7 +123,7 @@ server.post("/getAgendamentos", async (request, reply) => {
 
   const { nome } = request.body;
   const { token } = request.body;
-
+  
   let { servico } = request.body;
   let { tempo } = request.body;
   let { ordem } = request.body;
@@ -315,6 +331,13 @@ server.get("/getFreeDays", async (request, reply) => {
   reply.send(rows);
 });
 
+
+
+// ================================= Sobre o Dashboard =====================================
+
+
+// ================================= Landing Page =====================================
+
 // recupera os dados da landing page do salao
 server.get("/getClientToken/:token", async (request, reply) => {
   const { token } = request.params;
@@ -337,10 +360,16 @@ server.get("/getClientToken/:token", async (request, reply) => {
   reply.header("Content-Type", "application/json; charset=utf-8").send(rows[0]);
 });
 
+// ================================= Landing Page =====================================
+
+
+
+// ================================== Sobre a pagina de agendamentos =============================
+
 // recolhe os dadaos para a rota de agendamentos (no caso, os servicos e seus valores)
 server.get("/getClientToken/:token/agendamentos", async (request, reply) =>{
   const {token} = request.params
-
+  
   // pega os servisoe e seus vaolores relacionado ao token do client, alem do nome e logo do salao.
   const queryString = `SELECT servico, valor FROM servico_valor JOIN proprietarios p ON (SELECT token FROm proprietarios WHERE client_token = $1) = proprietario_id WHERE $1 = p.client_token;`
 
@@ -412,8 +441,8 @@ server.post("/getClientToken/:token/agendamentos/send", async (request, reply) =
 
   try{
     // cria o agendamento
-    const insertAgendemtnoQuery = "INSERT INTO agendamentos(data_agendamento, horario, servico_valor, client_id) VALUES ($1, $2, (SELECT id FROM servico_valor WHERE servico = $3), $4) RETURNING *"
-    let {rows: agendametoInserido} = await db.query(insertAgendemtnoQuery, [fields.dia, fields.horario, fields.servico, fields.id])
+    const insertAgendemtnoQuery = "INSERT INTO agendamentos(data_agendamento, horario, servico_valor, client_id, obs) VALUES ($1, $2, (SELECT id FROM servico_valor WHERE servico = $3), $4, $5) RETURNING *"
+    let {rows: agendametoInserido} = await db.query(insertAgendemtnoQuery, [fields.dia, fields.horario, fields.servico, fields.id, fields.observacao])
     console.log("fields: ")
     console.log(fields)
     console.log(agendametoInserido)
@@ -425,8 +454,20 @@ server.post("/getClientToken/:token/agendamentos/send", async (request, reply) =
   console.log(fields)
   reply.send(e)
   }
-
-
 })
+
+server.get("/getClientToken/:token/agendamentos/getAgendamentos/geUserInfos", async (request, reply) =>{
+
+  const {token} = request.params
+
+  const queryUsernameANDPhoneNumber = "SELECT nome, telefone FROM clientes WHERE id = $1"
+  const {rows: userInfos} = await db.query(queryUsernameANDPhoneNumber, [token])
+  
+  reply.send(userInfos[0])
+})
+
+
+
+// ================================== Sobre a pagina de agendamentos =============================
 
 server.listen({ port: 3001 });
