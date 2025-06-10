@@ -470,4 +470,4 @@ server.get("/getClientToken/:token/agendamentos/getAgendamentos/geUserInfos", as
 
 // ================================== Sobre a pagina de agendamentos =============================
 
-server.listen({ port: 3001 });
+server.listen({ port: 3001, host: process.env.RENDER ? "0.0.0.0" : "localhost"});
