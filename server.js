@@ -19,6 +19,8 @@ server.register(cors, {
 // O OID 3802 corresponde ao tipo JSONB
 // types.setTypeParser(3802, (val) => val);
 
+// DATABASE_URL = postgresql://saloon_data_base_user:gz4GKdXeYIhDl62vKIy1ag7ZeozhWEIu@dpg-d13sbcruibrs73br287g-a.oregon-postgres.render.com/saloon_data_base
+
 const connection = process.env.DATABASE_URL
   ? {
       connectionString: process.env.DATABASE_URL, 
@@ -33,7 +35,6 @@ const connection = process.env.DATABASE_URL
   password: "2006",
   port: "5432",
   client_encoding: "UTF8",
-  
 }
 
 const db = new Pool(connection)
@@ -98,13 +99,13 @@ server.get("/getResumo", async (request, reply) => {
 
   const queryFilters = {
     columns:
-      "clientes.telefone, clientes.nome, horario, servico_valor.servico, estatus, agendamentos.id",
-    join: "JOIN clientes ON clientes.telefone = client_id JOIN servico_valor ON servico_valor. id = servico_valor JOIN clientela ON clientela.id = clientela_id",
-    data: "data_agendamento = CURRENT_DATE",
+      "clientes.telefone, clientes.nome, horario, servico_valor.servico, estatus, ag.id",
+    join: "JOIN clientes ON clientes.telefone = client_id JOIN servico_valor ON servico_valor. id = servico_valor JOIN proprietarios pp ON pp.client_token = ag.client_token",
+    data: `data_agendamento = CURRENT_DATE AND ag.client_token = (SELECT client_token FROM proprietarios WHERE token = $1)`,
   };
 
   // Fora que ele filtra para os agendamentos de Hoje
-  const query = `SELECT ${queryFilters.columns} FROM agendamentos ${queryFilters.join} WHERE ${queryFilters.data} AND clientela.poriorietario_id = ${token}`;
+  const query = `SELECT ${queryFilters.columns} FROM agendamentos ag ${queryFilters.join} WHERE ${queryFilters.data}`;
   // pesquisa os clientes com agendamento para hoje
   // Dados da pesquisa:
   // Nome do cliente
@@ -112,9 +113,15 @@ server.get("/getResumo", async (request, reply) => {
   // Servico
   // Telefone
 
-  console.log(query);
-  const { rows } = await db.query(query);
-  reply.send(rows);
+  try{
+    console.log(query);
+    const { rows } = await db.query(query, [token]);
+    reply.send(rows);
+  }catch(e){
+    console.log(e)
+    reply.send({});
+  }
+
 });
 
 // dados de agendamentos do dashboard
@@ -350,7 +357,9 @@ server.get("/getClientToken/:token", async (request, reply) => {
   const { rows } = await db.query(query, [token]);
   // const { rows } = await db.query(query);
 
-  console.log(rows[0]);
+  const nada = Object.keys(rows[0].content).filter(x => x.includes("servicos_feitos_imgs"))
+
+  console.log(nada);
   if(rows[0] === undefined){
     console.log("dsdsdsdsdsdsdsdsdsdsdsdsdsdsdsdsdsdsdsdsd");
     reply.header("Content-Type", "application/json; charset=utf-8").code(300).send(rows[0]);
