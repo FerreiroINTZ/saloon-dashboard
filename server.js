@@ -263,7 +263,7 @@ server.get("/setStatus/:id", async (request, reply) => {
 server.post("/lucros", async (request, reply) => {
   console.log("\nLucros\n");
 
-  // const {nome, token} = request.body
+  const {nome, token} = request.body
 
   let { tempo } = request.body;
   let { estado } = request.body;
@@ -271,7 +271,8 @@ server.post("/lucros", async (request, reply) => {
   console.log("Vars: ");
   console.log(tempo);
   console.log(estado);
-
+  
+  try{
   if (!tempo || typeof tempo === "undefined" || tempo == "ontem") {
     console.log("Nada!");
     time = 1;
@@ -291,20 +292,27 @@ server.post("/lucros", async (request, reply) => {
 
   const queryFilters = {
     columns: "c.nome, c.telefone, sv.servico, sv.valor, estatus",
-    join: "JOIN clientes c ON c.telefone = client_id JOIN servico_valor sv ON sv.id = servico_valor JOIN clientela ON clientela.id = clientela_id",
-    data: `data_agendamento <= CURRENT_DATE AND data_agendamento >= CURRENT_DATE - INTERVAL '${time} days'`,
+    join: "JOIN clientes c ON c.id = client_id JOIN servico_valor sv ON sv.id = servico_valor JOIN proprietarios pp ON pp.client_token = ag.client_token",
+    data: `data_agendamento <= CURRENT_DATE AND data_agendamento >= CURRENT_DATE - INTERVAL '${time} days' AND ag.client_token = (SELECT client_token FROM proprietarios WHERE token = $1)`,
   };
 
-  const query = `SELECT ${queryFilters.columns} FROM agendamentos ${queryFilters.join} WHERE ${estado} AND ${queryFilters.data} AND clientela.proprietario_id = ${token}`;
+  const query = `SELECT ${queryFilters.columns} FROM agendamentos ag ${queryFilters.join} WHERE ${estado} AND ${queryFilters.data}`;
 
   console.log(query);
 
-  const { rows } = await db.query(query);
-
-  console.log("rows: ");
-  console.log(rows[0]);
-
-  reply.send(rows);
+    const { rows } = await db.query(query, [token]);
+  
+    console.log("===============");
+    console.log("rows: ");
+    console.log(estado);
+    console.log(rows);
+    console.log("===============");
+  
+    reply.send(rows);
+  }catch(e){
+    console.log(e)
+    reply.send({})
+  }
 });
 
 // dados dos dias livres, dos agendamentos do dashboard
