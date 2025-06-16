@@ -159,26 +159,31 @@ server.post("/getAgendamentos", async (request, reply) => {
   const queryFields = {
     columns:
       "clientes.telefone, clientes.nome, data_agendamento, servico_valor.servico, servico_valor.valor",
-    join: "JOIN clientes ON clientes.telefone = client_id JOIN servico_valor ON servico_valor. id = servico_valor JOIN clientela ON clientela.id = clientela_id",
+    join: "JOIN clientes ON clientes.telefone = client_id JOIN servico_valor ON servico_valor. id = servico_valor JOIN proprietarios pp ON pp.client_token = ag.client_token",
 
     // CURRENT_DATE + INTERVAL: '7 days' => faz um calculo. O INTERVAL serve para adicionar masi dias.
-    date: `data_agendamento <= CURRENT_DATE + INTERVAL '${tempo} days' AND data_agendamento >= CURRENT_DATE AND clientela.proprietario_id = ${token}`,
+    date: `data_agendamento <= CURRENT_DATE + INTERVAL '${tempo} days' AND data_agendamento >= CURRENT_DATE AND ag.client_token = (SELECT client_token FROM proprietarios WHERE token = $1)`,
 
     // ORDER BY <coluna> ASC -> ordena em ordem crescente ou alfabetica.
     ordem: `ORDER BY data_agendamento ${ordem}`,
   };
 
-  const query = `SELECT ${queryFields.columns} FROM agendamentos ${queryFields.join} WHERE ${queryFields.date} ${queryFields.ordem}`;
+  const query = `SELECT ${queryFields.columns} FROM agendamentos ag ${queryFields.join} WHERE ${queryFields.date} ${queryFields.ordem}`;
 
   console.log("pesquisando!");
 
-  const { rows } = await db.query(query);
-
-  console.log("rows:");
-  // console.log(rows)
-  console.log(ordem);
-
-  reply.send(rows);
+  try{
+    const { rows } = await db.query(query, [token]);
+  
+    console.log("rows:");
+    // console.log(rows)
+    console.log(ordem);
+  
+    reply.send(rows);
+  }catch(e){
+    console.log(e)
+    reply.send({})
+  }
 });
 
 // dados do jistorico do dashbaord
