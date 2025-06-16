@@ -2,7 +2,7 @@ const server = require("fastify")();
 const { Pool, types } = require("pg");
 const cookies = require("@fastify/cookie");
 const cors = require("@fastify/cors");
-require("dotenv").config()
+require("dotenv").config();
 
 console.log("Servidor no Ar!");
 
@@ -23,24 +23,23 @@ server.register(cors, {
 
 const connection = process.env.DATABASE_URL
   ? {
-      connectionString: process.env.DATABASE_URL, 
+      connectionString: process.env.DATABASE_URL,
       ssl: {
-        rejectUnauthorized: false
-      }
+        rejectUnauthorized: false,
+      },
     }
   : {
-  user: "postgres",
-  host: "localhost",
-  database: "saloon_dashboard",
-  password: "2006",
-  port: "5432",
-  client_encoding: "UTF8",
-}
+      user: "postgres",
+      host: "localhost",
+      database: "saloon_dashboard",
+      password: "2006",
+      port: "5432",
+      client_encoding: "UTF8",
+    };
 
-const db = new Pool(connection)
+const db = new Pool(connection);
 
-db.connect().then(() => db.query("SET client_encoding  = 'UTF8';"))
-
+db.connect().then(() => db.query("SET client_encoding  = 'UTF8';"));
 
 const data = async () => {
   const { rows } = await db.query("SHOW CLIENT_ENCODING;");
@@ -49,10 +48,7 @@ const data = async () => {
 
 data();
 
-
-
 // ================================= Sobre o Dashboard =====================================
-
 
 // autenticacao do dasboard
 server.get("/get/:user", async (request, reply) => {
@@ -113,15 +109,14 @@ server.get("/getResumo", async (request, reply) => {
   // Servico
   // Telefone
 
-  try{
+  try {
     console.log(query);
     const { rows } = await db.query(query, [token]);
     reply.send(rows);
-  }catch(e){
-    console.log(e)
+  } catch (e) {
+    console.log(e);
     reply.send({});
   }
-
 });
 
 // dados de agendamentos do dashboard
@@ -130,7 +125,7 @@ server.post("/getAgendamentos", async (request, reply) => {
 
   const { nome } = request.body;
   const { token } = request.body;
-  
+
   let { servico } = request.body;
   let { tempo } = request.body;
   let { ordem } = request.body;
@@ -172,22 +167,23 @@ server.post("/getAgendamentos", async (request, reply) => {
 
   console.log("pesquisando!");
 
-  try{
+  try {
     const { rows } = await db.query(query, [token]);
-  
+
     console.log("rows:");
     // console.log(rows)
     console.log(ordem);
-  
+
     reply.send(rows);
-  }catch(e){
-    console.log(e)
-    reply.send({})
+  } catch (e) {
+    console.log(e);
+    reply.send({});
   }
 });
 
 // dados do jistorico do dashbaord
 server.post("/getHistory", async (request, reply) => {
+  console.log("===========================");
   console.log("Get History ");
 
   const { nome } = request.body;
@@ -224,16 +220,16 @@ server.post("/getHistory", async (request, reply) => {
 
   const query = `SELECT ${queryFields.columns} FROM agendamentos ag ${queryFields.join} WHERE ${queryFields.date} ${queryFields.ordem}`;
 
-  try{
+  try {
     const { rows } = await db.query(query, [token]);
     // console.log(rows)
     console.log(ordem);
     console.log(tempo);
     console.log(rows[0]);
-  
+
     reply.send(rows);
-  }catch(e){
-    console.log(e)
+  } catch (e) {
+    console.log(e);
     reply.send({});
   }
 });
@@ -263,7 +259,7 @@ server.get("/setStatus/:id", async (request, reply) => {
 server.post("/lucros", async (request, reply) => {
   console.log("\nLucros\n");
 
-  const {nome, token} = request.body
+  const { nome, token } = request.body;
 
   let { tempo } = request.body;
   let { estado } = request.body;
@@ -271,47 +267,47 @@ server.post("/lucros", async (request, reply) => {
   console.log("Vars: ");
   console.log(tempo);
   console.log(estado);
-  
-  try{
-  if (!tempo || typeof tempo === "undefined" || tempo == "ontem") {
-    console.log("Nada!");
-    time = 1;
-  } else {
-    console.log("Tudo!");
-    time = Number(tempo) * 7;
-  }
 
-  if (!estado || estado == "todos") {
-    estado = "estatus != 'agendado'";
-  } else {
-    estado = `estatus = '${estado}'`;
-  }
-  console.log("Apos a mudanca: ");
-  console.log(tempo);
-  console.log(estado);
+  try {
+    if (!tempo || typeof tempo === "undefined" || tempo == "ontem") {
+      console.log("Nada!");
+      time = 1;
+    } else {
+      console.log("Tudo!");
+      time = Number(tempo) * 7;
+    }
 
-  const queryFilters = {
-    columns: "c.nome, c.telefone, sv.servico, sv.valor, estatus",
-    join: "JOIN clientes c ON c.id = client_id JOIN servico_valor sv ON sv.id = servico_valor JOIN proprietarios pp ON pp.client_token = ag.client_token",
-    data: `data_agendamento <= CURRENT_DATE AND data_agendamento >= CURRENT_DATE - INTERVAL '${time} days' AND ag.client_token = (SELECT client_token FROM proprietarios WHERE token = $1)`,
-  };
+    if (!estado || estado == "todos") {
+      estado = "estatus != 'agendado'";
+    } else {
+      estado = `estatus = '${estado}'`;
+    }
+    console.log("Apos a mudanca: ");
+    console.log(tempo);
+    console.log(estado);
 
-  const query = `SELECT ${queryFilters.columns} FROM agendamentos ag ${queryFilters.join} WHERE ${estado} AND ${queryFilters.data}`;
+    const queryFilters = {
+      columns: "c.nome, c.telefone, sv.servico, sv.valor, estatus",
+      join: "JOIN clientes c ON c.id = client_id JOIN servico_valor sv ON sv.id = servico_valor JOIN proprietarios pp ON pp.client_token = ag.client_token",
+      data: `data_agendamento <= CURRENT_DATE AND data_agendamento >= CURRENT_DATE - INTERVAL '${time} days' AND ag.client_token = (SELECT client_token FROM proprietarios WHERE token = $1)`,
+    };
 
-  console.log(query);
+    const query = `SELECT ${queryFilters.columns} FROM agendamentos ag ${queryFilters.join} WHERE ${estado} AND ${queryFilters.data}`;
+
+    console.log(query);
 
     const { rows } = await db.query(query, [token]);
-  
+
     console.log("===============");
     console.log("rows: ");
     console.log(estado);
     console.log(rows);
     console.log("===============");
-  
+
     reply.send(rows);
-  }catch(e){
-    console.log(e)
-    reply.send({})
+  } catch (e) {
+    console.log(e);
+    reply.send({});
   }
 });
 
@@ -357,10 +353,7 @@ server.get("/getFreeDays", async (request, reply) => {
   reply.send(rows);
 });
 
-
-
 // ================================= Sobre o Dashboard =====================================
-
 
 // ================================= Landing Page =====================================
 
@@ -370,18 +363,24 @@ server.get("/getClientToken/:token", async (request, reply) => {
   console.log("token: ");
   console.log(token);
 
-  const query ="SELECT content, p.modelo, p.salao FROM site_content JOIN proprietarios p ON p.client_token = proprietario_client_token WHERE proprietario_client_token = $1";
+  const query =
+    "SELECT content, p.modelo, p.salao FROM site_content JOIN proprietarios p ON p.client_token = proprietario_client_token WHERE proprietario_client_token = $1";
   // const query ="SELECT texto FROM site_content WHERE id = 10";
 
   const { rows } = await db.query(query, [token]);
   // const { rows } = await db.query(query);
 
-  const nada = Object.keys(rows[0].content).filter(x => x.includes("servicos_feitos_imgs"))
+  const nada = Object.keys(rows[0].content).filter((x) =>
+    x.includes("servicos_feitos_imgs")
+  );
 
   console.log(nada);
-  if(rows[0] === undefined){
+  if (rows[0] === undefined) {
     console.log("dsdsdsdsdsdsdsdsdsdsdsdsdsdsdsdsdsdsdsdsd");
-    reply.header("Content-Type", "application/json; charset=utf-8").code(300).send(rows[0]);
+    reply
+      .header("Content-Type", "application/json; charset=utf-8")
+      .code(300)
+      .send(rows[0]);
   }
   console.log("=====================================");
 
@@ -390,112 +389,163 @@ server.get("/getClientToken/:token", async (request, reply) => {
 
 // ================================= Landing Page =====================================
 
-
-
 // ================================== Sobre a pagina de agendamentos =============================
 
 // recolhe os dadaos para a rota de agendamentos (no caso, os servicos e seus valores)
-server.get("/getClientToken/:token/agendamentos", async (request, reply) =>{
-  const {token} = request.params
-  
+server.get("/getClientToken/:token/agendamentos", async (request, reply) => {
+  const { token } = request.params;
+
   // pega os servisoe e seus vaolores relacionado ao token do client, alem do nome e logo do salao.
-  const queryString = `SELECT servico, valor FROM servico_valor JOIN proprietarios p ON (SELECT token FROm proprietarios WHERE client_token = $1) = proprietario_id WHERE $1 = p.client_token;`
+  const queryString = `SELECT servico, valor FROM servico_valor JOIN proprietarios p ON (SELECT token FROM proprietarios WHERE client_token = $1) = proprietario_id WHERE $1 = p.client_token`;
 
-  const {rows} = await db.query(queryString, [token])
+  const { rows } = await db.query(queryString, [token]);
 
-  reply.send({rows})
-})
+  reply.send({ rows });
+});
 
-// responsavel por salvar os dados do usuario, caso nao exista.
-server.post("/getClientToken/:token/agendamentos/getClientData", async (request, reply) =>{
+server.get("/getClientToken/:token/agendamentos/saloonData", async (request,reply) =>{
   const {token} = request.params
-  // const {nome, email, uid} = request.body
-  const {name, email, uid, phoneNumber} = JSON.parse(request.body)
 
-  const {rows: verifiUserExist} = await db.query("SELECT * FROM clientes WHERE id = $1", [token])
+  const queryString = `SELECT content->'salao_logo' AS salao_logo, pp.salao FROM site_content JOIN proprietarios pp ON pp.client_token = proprietario_client_token WHERE proprietario_client_token = $1`
 
-  console.log("verifiUserExist: ")
-  console.log(verifiUserExist)
-
-  // ele retornar uma arrau vazia, significa que o usuario nao existe
-  if(!verifiUserExist.length){
-    try{
-      const insertUserQuery = "INSERT INTO clientes(id, nome, email) VALUES ($1, $2, $3) RETURNING *"
+  const { rows } = await db.query(queryString, [token])
   
-      const {rows: userInserted} = await db.query(insertUserQuery, [token, name, email])
-  
-      console.log(userInserted)
-
-    }catch (e){
-      console.log("Deu algum eror na hora de salvar!")
-      console.log(e)
-    }
-  }
-
-  reply.send(verifiUserExist[0])
-  
-})
-
-// responsavel por atualizar o numero de telefone do usuario
-server.get("/getClientToken/:token/agendamentos/changePhoneNumber/:telefone", async (request, reply) =>{
-  const {token} = request.params
-  const {telefone} = request.params
-
-  const queryString = "UPDATE clientes SET telefone = $1 WHERE id = $2 RETURNING *"
-  const {rows} = await db.query(queryString, [telefone, token])
-
-  console.log("Dados Atualizados: ")
-  console.log(rows)
-
   reply.send(rows[0])
 })
 
+// responsavel por salvar os dados do usuario, caso nao exista.
+server.post(
+  "/getClientToken/:token/agendamentos/getClientData",
+  async (request, reply) => {
+    const { token } = request.params;
+    // const {nome, email, uid} = request.body
+    const { name, email, uid, phoneNumber } = JSON.parse(request.body);
+
+    const { rows: verifiUserExist } = await db.query(
+      "SELECT * FROM clientes WHERE id = $1",
+      [token]
+    );
+
+    console.log("verifiUserExist: ");
+    console.log(verifiUserExist);
+
+    // ele retornar uma arrau vazia, significa que o usuario nao existe
+    if (!verifiUserExist.length) {
+      try {
+        const insertUserQuery =
+          "INSERT INTO clientes(id, nome, email) VALUES ($1, $2, $3) RETURNING *";
+
+        const { rows: userInserted } = await db.query(insertUserQuery, [
+          token,
+          name,
+          email,
+        ]);
+
+        console.log(userInserted);
+      } catch (e) {
+        console.log("Deu algum eror na hora de salvar!");
+        console.log(e);
+      }
+    }
+
+    reply.send(verifiUserExist[0]);
+  }
+);
+
+// responsavel por atualizar o numero de telefone do usuario
+server.get(
+  "/getClientToken/:token/agendamentos/changePhoneNumber/:telefone",
+  async (request, reply) => {
+    const { token } = request.params;
+    const { telefone } = request.params;
+
+    const queryString =
+      "UPDATE clientes SET telefone = $1 WHERE id = $2 RETURNING *";
+    const { rows } = await db.query(queryString, [telefone, token]);
+
+    console.log("Dados Atualizados: ");
+    console.log(rows);
+
+    reply.send(rows[0]);
+  }
+);
+
 // rota responsavel por buscar os agendamentos
-server.get("/getClientToken/:token/agendamentos/getAgendamentos/", async (request, reply) =>{
-  const {token} = request.params
+server.get(
+  "/getClientToken/:token/agendamentos/getAgendamentos",
+  async (request, reply) => {
+    const { token } = request.params;
+    const { slug } = request.query;
 
-  const queryString = "SELECT data_agendamento, horario, sv.servico, sv.valor FROM agendamentos JOIN servico_valor sv ON sv.id = servico_valor WHERE client_id = $1 ORDER BY data_agendamento ASC, horario ASC"
-  const {rows: agendamentos} = await db.query(queryString, [token])
+    const queryString =
+      "SELECT data_agendamento, horario, sv.servico, sv.valor FROM agendamentos JOIN servico_valor sv ON sv.id = servico_valor WHERE client_id = $1 AND client_token = $2 ORDER BY data_agendamento ASC, horario ASC";
 
-  console.log(agendamentos)
+      console.log("========================");
+      try{
+        const { rows: agendamentos } = await db.query(queryString, [token, slug]);
+    
+        console.log(agendamentos);
+        console.log(slug);
 
-  reply.send(agendamentos)
-})
+        reply.send(agendamentos);
+      }catch(e){
+        console.log(e)
+        reply.send({})
+      }
+  }
+);
 
 // salva o agendamente e/ou cria o usuario, com base no telefone
-server.post("/getClientToken/:token/agendamentos/send", async (request, reply) =>{
-  const {token} = request.params
-  const fields = JSON.parse(request.body)
+server.post(
+  "/getClientToken/:token/agendamentos/send",
+  async (request, reply) => {
+    const { token } = request.params;
+    const { client_token } = request.query;
+    const fields = JSON.parse(request.body);
 
-  try{
-    // cria o agendamento
-    const insertAgendemtnoQuery = "INSERT INTO agendamentos(data_agendamento, horario, servico_valor, client_id, obs) VALUES ($1, $2, (SELECT id FROM servico_valor WHERE servico = $3), $4, $5) RETURNING *"
-    let {rows: agendametoInserido} = await db.query(insertAgendemtnoQuery, [fields.dia, fields.horario, fields.servico, fields.id, fields.observacao])
-    console.log("fields: ")
-    console.log(fields)
-    console.log(agendametoInserido)
-    reply.send(agendametoInserido)
-
-  }catch(e){
-  console.log(e)
-  console.log("fields: ")
-  console.log(fields)
-  reply.send(e)
+    try {
+      // cria o agendamento
+      const insertAgendemtnoQuery =
+        "INSERT INTO agendamentos(data_agendamento, horario, servico_valor, client_id, obs, client_token) VALUES ($1, $2, (SELECT id FROM servico_valor WHERE servico = $3), $4, $5, $6) RETURNING *";
+      let { rows: agendametoInserido } = await db.query(insertAgendemtnoQuery, [
+        fields.dia,
+        fields.horario,
+        fields.servico,
+        fields.id,
+        fields.observacao,
+        client_token,
+      ]);
+      console.log("fields: ");
+      console.log(fields);
+      console.log(agendametoInserido);
+      reply.send(agendametoInserido);
+    } catch (e) {
+      console.log(e);
+      console.log("fields: ");
+      console.log(fields);
+      reply.send(e);
+    }
   }
-})
+);
 
-server.get("/getClientToken/:token/agendamentos/getAgendamentos/geUserInfos", async (request, reply) =>{
+server.get(
+  "/getClientToken/:token/agendamentos/getAgendamentos/geUserInfos",
+  async (request, reply) => {
+    const { token } = request.params;
 
-  const {token} = request.params
+    const queryUsernameANDPhoneNumber =
+      "SELECT nome, telefone FROM clientes WHERE id = $1";
+    const { rows: userInfos } = await db.query(queryUsernameANDPhoneNumber, [
+      token,
+    ]);
 
-  const queryUsernameANDPhoneNumber = "SELECT nome, telefone FROM clientes WHERE id = $1"
-  const {rows: userInfos} = await db.query(queryUsernameANDPhoneNumber, [token])
-  
-  reply.send(userInfos[0])
-})
-
-
+    reply.send(userInfos[0]);
+  }
+);
 
 // ================================== Sobre a pagina de agendamentos =============================
 
-server.listen({ port: 3001, host: process.env.RENDER ? "0.0.0.0" : "localhost"});
+server.listen({
+  port: 3001,
+  host: process.env.RENDER ? "0.0.0.0" : "localhost",
+});
