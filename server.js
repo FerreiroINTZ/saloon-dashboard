@@ -212,24 +212,30 @@ server.post("/getHistory", async (request, reply) => {
 
   const queryFields = {
     columns:
-      "agendamentos.id, clientes.nome, clientes.telefone, servico_valor.servico, data_agendamento, estatus",
-    join: "JOIN clientes ON clientes.telefone = client_id JOIN servico_valor ON servico_valor.id = servico_valor JOIN clientela ON clientela.id = clientela_id",
+      "ag.id, clientes.nome, clientes.telefone, servico_valor.servico, data_agendamento, estatus",
+    join: "JOIN clientes ON clientes.id = client_id JOIN servico_valor ON servico_valor.id = servico_valor JOIN proprietarios pp ON pp.client_token = ag.client_token",
 
-    // CURRENT_DATE + INTERVAL: '7 days' => faz um calculo. O INTERVAL serve para adicionar masi dias.
-    date: `data_agendamento >= CURRENT_DATE - INTERVAL '${tempo} days' AND data_agendamento < CURRENT_DATE AND clientela.proprietario_id = ${token}`,
+    // CURRENT_DATE + INTERVAL: '7 days' => faz um calculo. O INTERVAL serve para adicionar mais dias.
+    date: `data_agendamento >= CURRENT_DATE - INTERVAL '${tempo} days' AND data_agendamento < CURRENT_DATE AND ag.client_token = (SELECT client_token FROM proprietarios WHERE token = $1)`,
 
     // ORDER BY <coluna> ASC -> ordena em ordem crescente ou alfabetica.
     ordem: `ORDER BY data_agendamento ${ordem}`,
   };
 
-  const query = `SELECT ${queryFields.columns} FROM agendamentos ${queryFields.join} WHERE ${queryFields.date} ${queryFields.ordem}`;
+  const query = `SELECT ${queryFields.columns} FROM agendamentos ag ${queryFields.join} WHERE ${queryFields.date} ${queryFields.ordem}`;
 
-  const { rows } = await db.query(query);
-  // console.log(rows)
-  console.log(ordem);
-  console.log(tempo);
-
-  reply.send(rows);
+  try{
+    const { rows } = await db.query(query, [token]);
+    // console.log(rows)
+    console.log(ordem);
+    console.log(tempo);
+    console.log(rows[0]);
+  
+    reply.send(rows);
+  }catch(e){
+    console.log(e)
+    reply.send({});
+  }
 });
 
 // muda o esatus de um agendametno, no dashboard (agendado, completo, cancelado)
